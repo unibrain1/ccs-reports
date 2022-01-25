@@ -39,12 +39,12 @@ $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->result
             echo "<td>$classifier->distance</td>";
             echo "<td>$classifier->strings</td>";
 
-            echo '<td>' . ($classifier->reload  ? 'Yes' : '') . '</td>';
-            echo '<td>' . ($classifier->barricade  ? 'Yes' : '') . '</td>';
-            echo '<td>' . ($classifier->table  ? 'Yes' : '') . '</td>';
-            echo '<td>' . ($classifier->prop  ? 'Yes' : '') . '</td>';
-            echo '<td>' . ($classifier->shoWho  ? 'Yes' : '') . '</td>';
-            echo '<td>' . ($classifier->movement  ? 'Yes' : '') . '</td>';
+            echo '<td>' . ($classifier->reload  ? 'Yes' : 'No') . '</td>';
+            echo '<td>' . ($classifier->barricade  ? 'Yes' : 'No') . '</td>';
+            echo '<td>' . ($classifier->table  ? 'Yes' : 'No') . '</td>';
+            echo '<td>' . ($classifier->prop  ? 'Yes' : 'No') . '</td>';
+            echo '<td>' . ($classifier->shoWho  ? 'Yes' : 'No') . '</td>';
+            echo '<td>' . ($classifier->movement  ? 'Yes' : 'No') . '</td>';
             echo '<td>' . '<a href="https://uspsa.org/viewer/' . $classifier->classifier . '.pdf" target="_blank"</a>Diagram</td>';
             echo "</tr>";
         }
