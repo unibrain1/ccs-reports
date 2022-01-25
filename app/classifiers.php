@@ -3,80 +3,78 @@
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
-
 $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->results(); // Get all active classifiers
 
 ?>
-<table id="classifiers" class="table table-striped table-bordered table-sm display dataTable" style=" width:100%">
-    <thead>
-        <tr>
-            <th>Classifier</th>
-            <th>Name</th>
-            <th class='searchable'>Scoring</th>
-            <th class='searchable'>Rounds</th>
-            <th class='searchable'>Distance (feet)</th>
-            <th class='searchable'>Strings</th>
+<div class='col-12'>
+    <div class="row">
 
-            <th class='searchable'>Reload</th>
-            <th class='searchable'>Barricade</th>
-            <th class='searchable'>Table</th>
-            <th class='searchable'>Special Prop</th>
-            <th class='searchable'>SHO/WHO</th>
-            <th class='searchable'>Movement</th>
-            <th>Diagram (new window)</th>
+        <div class="card card-default">
+            <div class="card-header">
+                <h2><strong>USPSA Classifiers</strong></h2>
+                <h6 class="card-subtitle text-muted">Interesting information about classifiers and setup</h6>
 
-        </tr>
-    </thead>
+            </div>
+            <div class="card-body">
 
-    <tbody>
-        <?php
-        foreach ($classifiers as $classifier) {
-            echo "<tr>";
-            echo "<td>$classifier->classifier</td>";
-            echo "<td>$classifier->name</td>";
-            echo "<td>$classifier->scoring</td>";
-            echo "<td>$classifier->rounds</td>";
-            echo "<td>$classifier->distance</td>";
-            echo "<td>$classifier->strings</td>";
+                <table id="classifiers" class="table table-striped table-bordered table-sm display dataTable" style=" width:100%">
+                    <thead>
+                        <tr>
+                            <th>Classifier</th>
+                            <th>Name</th>
+                            <th class='searchable'>Scoring</th>
+                            <th class='searchable'>Rounds</th>
+                            <th class='searchable'>Distance (feet)</th>
+                            <th class='searchable'>Strings</th>
 
-            echo '<td>' . ($classifier->reload  ? 'Yes' : 'No') . '</td>';
-            echo '<td>' . ($classifier->barricade  ? 'Yes' : 'No') . '</td>';
-            echo '<td>' . ($classifier->table  ? 'Yes' : 'No') . '</td>';
-            echo '<td>' . ($classifier->prop  ? 'Yes' : 'No') . '</td>';
-            echo '<td>' . ($classifier->shoWho  ? 'Yes' : 'No') . '</td>';
-            echo '<td>' . ($classifier->movement  ? 'Yes' : 'No') . '</td>';
-            echo '<td>' . '<a href="https://uspsa.org/viewer/' . $classifier->classifier . '.pdf" target="_blank"</a>Diagram</td>';
-            echo "</tr>";
-        }
-        ?>
-    </tbody>
-    <!-- <tfoot>
-        <tr>
-            <th>Classifier</th>
-            <th>Name</th>
-            <th>Scoring</th>
-            <th>Rounds</th>
-            <th>Distance</th>
-            <th>Strings</th>
+                            <th class='searchable'>Reload</th>
+                            <th class='searchable'>Barricade</th>
+                            <th class='searchable'>Table</th>
+                            <th class='searchable'>Special Prop</th>
+                            <th class='searchable'>SHO/WHO</th>
+                            <th class='searchable'>Movement</th>
+                            <th>Diagram (new window)</th>
 
-            <th>Reload</th>
-            <th>Barricade</th>
-            <th>Table</th>
-            <th>Special Prop</th>
-            <th>SHO/WHO</th>
-            <th>Movement</th>
-            <th>Diagram (new window)</th>
+                        </tr>
+                    </thead>
 
-        </tr>
-    </tfoot> -->
-</table>
+                    <tbody>
+                        <?php
+                        foreach ($classifiers as $classifier) {
+                            echo "<tr>";
+                            echo "<td>$classifier->classifier</td>";
+                            echo "<td>$classifier->name</td>";
+                            echo "<td>$classifier->scoring</td>";
+                            echo "<td>$classifier->rounds</td>";
+                            echo "<td>$classifier->distance</td>";
+                            echo "<td>$classifier->strings</td>";
 
+                            echo '<td>' . ($classifier->reload  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->barricade  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->table  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->prop  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->shoWho  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->movement  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . '<a href="https://uspsa.org/viewer/' . $classifier->classifier . '.pdf" target="_blank"</a>Diagram</td>';
+                            echo "</tr>";
+                        }
+                        ?>
+                    </tbody>
+
+                </table>
+            </div> <!-- card-body -->
+        </div> <!-- card -->
+    </div>
+</div>
+
+<!-- End of main content section -->
 
 <!-- Place any per-page javascript here -->
 <script type="text/javascript" src="../users/js/pagination/datatables.min.js"></script>
 <script>
     $(document).ready(function() {
         $('#classifiers').DataTable({
+            'pageLength': 25,
 
             // https: //www.datatables.net/examples/api/multi_filter_select.html
             initComplete: function() {
