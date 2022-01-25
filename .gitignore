@@ -23,6 +23,7 @@ runme.php
 !users/
 users/**
 !users/cron/
+!users/images/
 !users/images/logo.png
 # Exclude userspice extentions.  These need to be manually installed
 usersc/plugins/*
