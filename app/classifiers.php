@@ -3,7 +3,7 @@
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
-$classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->results(); // Get all active classifiers
+$classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->results(); // Get all active classifiers
 
 ?>
 <div class='col-12'>
@@ -44,7 +44,7 @@ $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->result
                     <tbody>
                         <?php
                         foreach ($classifiers as $classifier) {
-                            $lastshot = $db->query("SELECT * from section_classifier WHERE classifier = ? ORDER by date DESC LIMIT 1", [$classifier->classifier])->results();
+                            $lastshot = $db->query("SELECT * from ccs_section_classifier WHERE classifier = ? ORDER by date DESC LIMIT 1", [$classifier->classifier])->results();
                             // $shotTimeStamp = strtotime($lastshot[0]->date);
                             // $currentYear = date("Y");
                             // $yearLastShot = date("Y", $shotTimeStamp);

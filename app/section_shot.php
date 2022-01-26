@@ -6,7 +6,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/datetime/1.1.1/css/dataTables.dateTime.min.css">
 <?php
-$classifiers = $db->query("SELECT * from section_classifier")->results(); // Get all active classifiers
+$classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); // Get all active classifiers
 
 ?>
 <div class='col-12'>
