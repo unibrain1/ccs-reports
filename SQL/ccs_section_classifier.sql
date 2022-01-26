@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Jan 26, 2022 at 03:29 PM
+-- Generation Time: Jan 26, 2022 at 05:05 PM
 -- Server version: 5.7.34
 -- PHP Version: 7.4.21
 
@@ -27,7 +27,6 @@ SET time_zone = "+00:00";
 -- Table structure for table `ccs_section_classifier`
 --
 
-DROP TABLE IF EXISTS `ccs_section_classifier`;
 CREATE TABLE `ccs_section_classifier` (
   `id` int(4) NOT NULL,
   `club` varchar(23) DEFAULT NULL,

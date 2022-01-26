@@ -8,6 +8,7 @@ require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 <?php
 $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); // Get all active classifiers
 
+
 ?>
 <div class='col-12'>
     <div class="row">
@@ -34,7 +35,8 @@ $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); //
                 <table id="section" class="table table-striped table-bordered table-sm display dataTable" style=" width:100%">
                     <thead>
                         <tr>
-                            <th class='searchable'>Club</th>
+                            <th class='searchable'>Club ID</th>
+                            <th class='searchable'>Name</th>
                             <th class='searchable'>Classifier</th>
                             <th class='searchable'>Date</th>
                             <th>Diagram (new window)</th>
@@ -45,8 +47,11 @@ $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); //
                     <tbody>
                         <?php
                         foreach ($classifiers as $classifier) {
+                            $clubname = $db->query("SELECT name from ccs_clubs where club = ?", [$classifier->club])->first()->name;
+
                             echo "<tr>";
                             echo "<td>$classifier->club</td>";
+                            echo "<td>$clubname</td>";
                             echo "<td>$classifier->classifier</td>";
                             echo "<td>$classifier->date</td>";
 

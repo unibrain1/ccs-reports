@@ -44,11 +44,7 @@ $classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->re
                     <tbody>
                         <?php
                         foreach ($classifiers as $classifier) {
-                            $lastshot = $db->query("SELECT * from ccs_section_classifier WHERE classifier = ? ORDER by date DESC LIMIT 1", [$classifier->classifier])->results();
-                            // $shotTimeStamp = strtotime($lastshot[0]->date);
-                            // $currentYear = date("Y");
-                            // $yearLastShot = date("Y", $shotTimeStamp);
-                            // $age = abs($currentYear - $yearLastShot);
+                            $lastshot = $db->query("SELECT * from ccs_section_classifier WHERE classifier = ? ORDER by date DESC LIMIT 1", [$classifier->classifier])->first();
 
                             echo "<tr>";
                             echo "<td>$classifier->classifier</td>";
@@ -65,8 +61,14 @@ $classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->re
                             echo '<td>' . ($classifier->prop  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
                             echo '<td>' . ($classifier->shoWho  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
                             echo '<td>' . ($classifier->movement  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
-                            echo '<td>' . ($lastshot[0]->date) . '</td>';
-                            echo '<td>' . ($lastshot[0]->club) . '</td>';
+                            if ($lastshot) {
+                                echo '<td>' . ($lastshot->date) . '</td>';
+                                echo '<td>' . ($lastshot->clubname) . '</td>';
+                            } else {
+                                // The classifier has never been shot
+                                echo '<td></td>';
+                                echo '<td></td>';
+                            }
 
                             echo '<td>' . '<a href="https://uspsa.org/viewer/' . $classifier->classifier . '.pdf" target="_blank"</a>Diagram</td>';
 

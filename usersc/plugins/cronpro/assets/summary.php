@@ -1,49 +1,59 @@
 <?php
-global $ip, $settings, $db, $abs_us_root, $us_url_root;
-if ($ip != $settings->cron_ip) {
-    logger(1, "CronPro - summary.php", "Direct access attempted");
-    die;
+$browser = false;  // Set to true if you are calling from a browser
+
+if ($browser) {
+    require_once '../../../../users/init.php';
+} else {
+    global $ip, $settings, $db, $abs_us_root, $us_url_root;
+    if ($ip != $settings->cron_ip) {
+        logger(1, "CronPro - summary.php", "Direct access attempted");
+        die;
+    }
 }
-// logger(1, "summary.php", "Start");
+
+
+
 
 //put your script here. Don't touch anything above this line
 //Create any php script below
 
-// require_once '../../../../users/init.php';
-// require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
-
-// ALTER TABLE `ccs_section_classifier` ADD `clubname` VARCHAR(128) NOT NULL AFTER `date`, ADD `classifiername` VARCHAR(128) NOT NULL AFTER `clubname`;
 require('simple_html_dom.php');
 
 $base = 'https://uspsa.org/classifiers-by-club?action=show&club=';
-$clubs = array(
-    'CC01' => 'Columbia Cascade Section',
-    'CC02' => 'Tri-County Gun Club',
-    'CC03' => 'Dundee Practical Shooters',
-    // 'CC04' => 'Non-affiliated Club ',
-    'CC05' => 'Albany Rifle & Pistol Club',
-    'CC06' => 'Cossa Practical Shooters',
-    // 'CC07' => 'Douglas Ridge Rifle Club',
-    // 'CC08' => 'Eugene Practical Shooters',
-    // 'CC09' => 'Clatskanie Rifle & Pistol Club',
-    // 'CC10' => 'Painted Hills Practical Shooters',
-);
+
+// Get the clubs
+$clubs = $db->query("SELECT * from ccs_clubs where active = 1")->results();
+
+// $clubs = array(
+//     'CC01' => 'Columbia Cascade Section',
+//     'CC02' => 'Tri-County Gun Club',
+//     'CC03' => 'Dundee Practical Shooters',
+//     // 'CC04' => 'Non-affiliated Club ',
+//     'CC05' => 'Albany Rifle & Pistol Club',
+//     'CC06' => 'Cossa Practical Shooters',
+//     // 'CC07' => 'Douglas Ridge Rifle Club',
+//     // 'CC08' => 'Eugene Practical Shooters',
+//     // 'CC09' => 'Clatskanie Rifle & Pistol Club',
+//     // 'CC10' => 'Painted Hills Practical Shooters',
+// );
+
+
 
 $output = ""; // Message to be emailed
 $to = 'competition@columbia-cascade.org';
 
-foreach ($clubs as $club => $clubname) {
-    $url = $base . $club;
+foreach ($clubs as $club) {
+    $url = $base . $club->club;
 
     $html = file_get_html($url);
     if ($html) {
-        $output .=  "<strong>Fetching $club - $clubname</strong><br>";
+        $output .=  "<strong>Fetching $club->club - $club->name</strong><br>";
         // logger(1, "summary.php", $club);
 
         $record = [];
         foreach ($html->find('tr') as $row) {
-            $record['club']   = $club;
-            $record['clubname']   = $clubname;
+            $record['club']   = $club->club;
+            $record['clubname']   = $club->name;
             $record['classifier']   = $row->find('td', 0)->plaintext;
             $record['classifiername']    = $row->find('td', 1)->plaintext;
             $record['date']   = $row->find('td', 2)->plaintext; // Date format 1/16/22
@@ -82,4 +92,7 @@ foreach ($clubs as $club => $clubname) {
     }
 }
 email($to, 'CCS Section Classifier Summary Report', $output);
-// logger(1, "summary.php", "End");
+
+if ($browser) {
+    echo $output;
+}
