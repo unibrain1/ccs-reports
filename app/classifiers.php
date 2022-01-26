@@ -20,11 +20,12 @@ $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->result
                 <table id="classifiers" class="table table-striped table-bordered table-sm display dataTable" style=" width:100%">
                     <thead>
                         <tr>
-                            <th>Classifier</th>
-                            <th>Name</th>
+                            <th class='searchable'>Classifier</th>
+                            <th class='searchable'>Name</th>
                             <th class='searchable'>Scoring</th>
                             <th class='searchable'>Rounds</th>
-                            <th class='searchable'>Distance (feet)</th>
+                            <th class='searchable'>Depth (feet)</th>
+                            <th class='searchable'>Width (feet)</th>
                             <th class='searchable'>Strings</th>
 
                             <th class='searchable'>Reload</th>
@@ -33,6 +34,8 @@ $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->result
                             <th class='searchable'>Special Prop</th>
                             <th class='searchable'>SHO/WHO</th>
                             <th class='searchable'>Movement</th>
+                            <th class='searchable'>Last Shot (Years ago)</th>
+                            <th class='searchable'>Club</th>
                             <th>Diagram (new window)</th>
 
                         </tr>
@@ -41,21 +44,32 @@ $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->result
                     <tbody>
                         <?php
                         foreach ($classifiers as $classifier) {
+                            $lastshot = $db->query("SELECT * from section_classifier WHERE classifier = ? ORDER by date DESC LIMIT 1", [$classifier->classifier])->results();
+                            // $shotTimeStamp = strtotime($lastshot[0]->date);
+                            // $currentYear = date("Y");
+                            // $yearLastShot = date("Y", $shotTimeStamp);
+                            // $age = abs($currentYear - $yearLastShot);
+
                             echo "<tr>";
                             echo "<td>$classifier->classifier</td>";
                             echo "<td>$classifier->name</td>";
                             echo "<td>$classifier->scoring</td>";
                             echo "<td>$classifier->rounds</td>";
                             echo "<td>$classifier->distance</td>";
+                            echo "<td></td>";
                             echo "<td>$classifier->strings</td>";
 
-                            echo '<td>' . ($classifier->reload  ? 'Yes' : 'No') . '</td>';
-                            echo '<td>' . ($classifier->barricade  ? 'Yes' : 'No') . '</td>';
-                            echo '<td>' . ($classifier->table  ? 'Yes' : 'No') . '</td>';
-                            echo '<td>' . ($classifier->prop  ? 'Yes' : 'No') . '</td>';
-                            echo '<td>' . ($classifier->shoWho  ? 'Yes' : 'No') . '</td>';
-                            echo '<td>' . ($classifier->movement  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->reload  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($classifier->barricade  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($classifier->table  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($classifier->prop  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($classifier->shoWho  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($classifier->movement  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($lastshot[0]->date) . '</td>';
+                            echo '<td>' . ($lastshot[0]->club) . '</td>';
+
                             echo '<td>' . '<a href="https://uspsa.org/viewer/' . $classifier->classifier . '.pdf" target="_blank"</a>Diagram</td>';
+
                             echo "</tr>";
                         }
                         ?>
@@ -75,6 +89,9 @@ $classifiers  = $db->query("SELECT * from classifiers WHERE status = 1")->result
     $(document).ready(function() {
         $('#classifiers').DataTable({
             'pageLength': 25,
+            "order": [
+                [13, "asc"]
+            ],
 
             // https: //www.datatables.net/examples/api/multi_filter_select.html
             initComplete: function() {
