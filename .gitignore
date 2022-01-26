@@ -16,6 +16,7 @@ TODO
 runme.php
 *.sublime-project
 *.code-workspace
+push.sh
 
 # Exclude userspice base
 # Because I want to include users/cron/backup.php I need to do this
@@ -29,10 +30,9 @@ users/**
 usersc/plugins/*
 #
 # Include all the hooks
-!usersc/plugins/hooker/
-usersc/plugins/hooker/*
-!usersc/plugins/hooker/hooks/
-usersc/plugins/hooker/hooks/sample_hook.php
+!usersc/plugins/cronpro/
+usersc/plugins/cronpro/*
+!usersc/plugins/cronpro/assets/
 #
 usersc/templates/*
 usersc/widgets/*
