@@ -11,32 +11,16 @@ if ($browser) {
     }
 }
 
-
-
-
 //put your script here. Don't touch anything above this line
 //Create any php script below
 
-require('simple_html_dom.php');
+
+require_once $abs_us_root . $us_url_root . 'app/includes/simple_html_dom.php';
 
 $base = 'https://uspsa.org/classifiers-by-club?action=show&club=';
 
 // Get the clubs
 $clubs = $db->query("SELECT * from ccs_clubs where active = 1")->results();
-
-// $clubs = array(
-//     'CC01' => 'Columbia Cascade Section',
-//     'CC02' => 'Tri-County Gun Club',
-//     'CC03' => 'Dundee Practical Shooters',
-//     // 'CC04' => 'Non-affiliated Club ',
-//     'CC05' => 'Albany Rifle & Pistol Club',
-//     'CC06' => 'Cossa Practical Shooters',
-//     // 'CC07' => 'Douglas Ridge Rifle Club',
-//     // 'CC08' => 'Eugene Practical Shooters',
-//     // 'CC09' => 'Clatskanie Rifle & Pistol Club',
-//     // 'CC10' => 'Painted Hills Practical Shooters',
-// );
-
 
 
 $output = ""; // Message to be emailed
@@ -48,7 +32,6 @@ foreach ($clubs as $club) {
     $html = file_get_html($url);
     if ($html) {
         $output .=  "<strong>Fetching $club->club - $club->name</strong><br>";
-        // logger(1, "summary.php", $club);
 
         $record = [];
         foreach ($html->find('tr') as $row) {
@@ -66,10 +49,10 @@ foreach ($clubs as $club) {
                 $result = $db->get('ccs_section_classifier',  $record);
 
                 if ($result) {
-                    // logger(1, "summary.php", 'update');
-
                     $id = $result->results()[0]->id;
-                    // $output .= "Update Classifier for " .  $record['club'] . ", " . $record['classifier'] . ", " . $record['date'] . "<br>";
+                    if ($browser) {
+                        $output .= "Update Classifier for " .  $record['club'] . ", " . $record['classifier'] . ", " . $record['date'] . "<br>";
+                    }
 
                     $result =  $db->update(
                         "ccs_section_classifier",
@@ -77,8 +60,6 @@ foreach ($clubs as $club) {
                         $record
                     );
                 } else {
-                    // logger(1, "summary.php", 'new');
-
                     $output .= "New Classifier: " .  $record['date'] . ", " . $record['classifier'] . "<br>";
 
                     $result =  $db->insert(
