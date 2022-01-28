@@ -47,16 +47,12 @@ if (!empty($_GET)) {
     );
     $match_scores = curl_exec($curl);
 
-
-
     // Decoding JSON data
     $match_defData = json_decode($match_def, true);
     $match_scoresData = json_decode($match_scores, true);
 
-
     // Translate DQ key to DQ name and rule number
     $match_dqs = $match_defData["match_dqs"];
-
 
     // The contents of "$shooter['sh_dqrule']" (from match_deg.json) will depend on what OS was used for scoreing (or maybe the master??)  
     // This is further complicated because sometimes the scores are moved from an Andriod to an IOS (or vica-versa).  
@@ -76,6 +72,8 @@ if (!empty($_GET)) {
     //
     // My best guess - If the data as a '<' in it then assume it is in the iOS format
 
+    // To further complicate things, DQ information can be in the match data or on the scores data.  Each of these contains different information.  We will need to examine each to get complete information
+
     $matchShooters = $match_defData["match_shooters"];
 
     // The contents of $score["stagedq_details"] is the key to the DQ table $match_dqs
@@ -87,18 +85,32 @@ if (!empty($_GET)) {
 
     $output = ""; // Messages
 
-    // Get some match information
+    // Get some general match information
     $matchName = $match_defData["match_name"];
     $matchDate = date("Y-m-d", strtotime($match_defData["match_date"]));
-    $matchClub = strtoupper($match_defData["match_clubcode"]);
+    // Sometimes CLUB is not populated
+    if (array_key_exists('match_clubcode', $match_defData)) {
+        $matchClub = strtoupper($match_defData["match_clubcode"]);
+    } else {
+        $matchClub = "";
+    }
 
-    $shootersDQ = [];
+    $shootersDQ = [];  // A place to gather the information before writiing to the dB
 
+    //
     //  Walk through the SHOOTERS and find any shooter who has DQ'd
+    //
+    // Formats    
+    //   $shooter['sh_dqrule'] =  Astra Terminator<10.4.7 AD, while retrieving firearm>
+    // Andriod
+    //   $shooter['sh_dqrule'] =  Stage Name
+    //
     foreach ($matchShooters as $shooter) {
         if (array_key_exists('sh_dq', $shooter) &&  ($shooter["sh_dq"])) {
             $fname  = $shooter['sh_fn'];
             $lname  = $shooter['sh_ln'];
+            // Sometimes a shooter has no USPSA number
+
             if (array_key_exists('sh_id', $shooter)) {
                 $number = $shooter['sh_id'];
             } else {
@@ -144,7 +156,10 @@ if (!empty($_GET)) {
         }
     }
 
+    //
     // Now walk through the matchScores and find any shooter who as DQ'd
+    // If there is information at the stage score level it will be a DQ code that we need to translate to the actual DQ rule and reason..
+    //
     foreach ($matchScores as $stage) {
         foreach ($stage['stage_stagescores'] as $score) {
             if (array_key_exists('dqs', $score) && $score['dqs'] != "") {
@@ -155,10 +170,10 @@ if (!empty($_GET)) {
                 // Translate the DQ code to Rule and Description
                 $dqArray     = explode(' ', $match_dqs[$dq_key]['name'], 2);
 
-                // If the fname,lname, and number are the same as an existing entry in the array then add to the data.
                 $fname  = $matchShooters[$shooter_key]['sh_fn'];
                 $lname  = $matchShooters[$shooter_key]['sh_ln'];
 
+                // Sometimes a shooter has no USPSA number
                 if (array_key_exists('sh_id', $matchShooters[$shooter_key])) {
                     $number = $matchShooters[$shooter_key]['sh_id'];
                 } else {
@@ -167,6 +182,7 @@ if (!empty($_GET)) {
 
                 $hash   = $matchDate . $fname . $lname . $number;
 
+                // Search the array to see if there is partial information from the match level.  If so augment it with the additional details
                 $key = array_search($hash, array_column($shootersDQ, 'hash'));
 
                 if ($key === false) {
@@ -180,7 +196,6 @@ if (!empty($_GET)) {
                         'rule'   => $dqArray[0],
                         'reason' => $dqArray[1],
                         'hash'   => $hash,
-
                     ];
                 } else {
                     $shootersDQ[$key] = [
@@ -193,19 +208,15 @@ if (!empty($_GET)) {
                         'rule'   => $dqArray[0],
                         'reason' => $dqArray[1],
                         'hash'   => $hash,
-
                     ];
                 }
             }
         }
     }
 
-    // Remove the hash column from the array
-
     //   Now write to the DB
     foreach ($shootersDQ as $shooter) {
         // Does this record already exist in the DB?  If so skip
-
         $result = $db->get('ccs_dq_log',  ['hash', '=', $shooter['hash']]);
         $id = $result->first()->id;
 
@@ -225,7 +236,6 @@ if (!empty($_GET)) {
         }
     }
 }
-
 ?>
 
 <br>
@@ -253,9 +263,8 @@ if (!empty($_GET)) {
                 echo "Name     : " . $matchName . "<br>";
                 echo "Date     : " . $matchDate . "<br>";
                 echo "Club     : " . $matchClub . "<br>";
-
                 echo "Shooters : " . count($matchShooters) . "<br>";
-                echo "<hr>";
+                echo "<br>";
                 echo $output;
                 ?>
             </div>
@@ -276,7 +285,6 @@ if (!empty($_GET)) {
                         <tr>
                             <th>Date</th>
                             <th>Club</th>
-
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>USPSA Number</th>
@@ -299,13 +307,11 @@ if (!empty($_GET)) {
                             echo '<td>' . $shooter['stage'] . '</td>';
                             echo '<td>' . $shooter['rule'] . '</td>';
                             echo '<td>' . $shooter['reason'] . '</td>';
-
                             echo '</tr>';
                         }
                         ?>
                     </tbody>
                 </table>
-
             </div>
         </div>
     </div>
