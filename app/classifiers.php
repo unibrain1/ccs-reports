@@ -11,7 +11,7 @@ $classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->re
 
         <div class="card card-default">
             <div class="card-header">
-                <h2><strong>USPSA Classifiers</strong></h2>
+                <h2>USPSA Classifiers</h2>
                 <h6 class="card-subtitle text-muted">Interesting information about classifiers and setup</h6>
 
             </div>
@@ -55,12 +55,12 @@ $classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->re
                             echo "<td></td>";
                             echo "<td>$classifier->strings</td>";
 
-                            echo '<td>' . ($classifier->reload  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
-                            echo '<td>' . ($classifier->barricade  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
-                            echo '<td>' . ($classifier->table  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
-                            echo '<td>' . ($classifier->prop  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
-                            echo '<td>' . ($classifier->shoWho  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
-                            echo '<td>' . ($classifier->movement  ? '<strong>Yes</strong>' : '<small>No</small>') . '</td>';
+                            echo '<td>' . ($classifier->reload  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->barricade  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->table  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->prop  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->shoWho  ? 'Yes' : 'No') . '</td>';
+                            echo '<td>' . ($classifier->movement  ? 'Yes' : 'No') . '</td>';
                             if ($lastshot) {
                                 echo '<td>' . ($lastshot->date) . '</td>';
                                 echo '<td>' . ($lastshot->clubname) . '</td>';
@@ -116,7 +116,21 @@ $classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->re
                         select.append('<option value="' + d + '">' + d + '</option>')
                     });
                 });
+            },
+
+            'rowCallback': function(row, data, index) {
+                // Format columns with Yes/No to Bold/small
+                // This walks all elements in the row
+                for (i = 0; i < data.length; i++) {
+                    if (data[i] == "Yes") {
+                        $(row).find("td:eq(" + i + ")").css('font-weight', 'bold');
+                    }
+                    if (data[i] == "No") {
+                        $(row).find("td:eq(" + i + ")").css('font-size', 'x-small');
+                    }
+                }
             }
+
         });
     });
 </script>
