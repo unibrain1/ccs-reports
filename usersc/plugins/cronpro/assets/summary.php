@@ -22,9 +22,12 @@ $base = 'https://uspsa.org/classifiers-by-club?action=show&club=';
 // Get the clubs
 $clubs = $db->query("SELECT * from ccs_clubs where active = 1")->results();
 
-
-$output = ""; // Message to be emailed
+// Email report
 $to = 'competition@columbia-cascade.org';
+$output = ""; // Message to be emailed
+// Add a link to the report 
+$output .= '<a href="http://www.columbia-cascade.org/report/app/section_shot.php">Online Report</a><br><br><hr>';
+
 
 foreach ($clubs as $club) {
     $url = $base . $club->club;
@@ -50,28 +53,37 @@ foreach ($clubs as $club) {
 
                 if ($result) {
                     $id = $result->results()[0]->id;
-                    if ($browser) {
-                        $output .= "Update Classifier for " .  $record['club'] . ", " . $record['classifier'] . ", " . $record['date'] . "<br>";
+                    if (is_null($id)) {
+                        $output .= "New Classifier: " .  $record['date'] . ", " . $record['classifier'] . "<br>";
+
+                        $result =  $db->insert(
+                            "ccs_section_classifier",
+                            $record
+                        );
+                    } else {
+
+
+                        if ($browser) {
+                            $output .= "Update Classifier for " .  $record['club'] . ", " . $record['classifier'] . ", " . $record['date'] . "<br>";
+                        }
+
+                        $result =  $db->update(
+                            "ccs_section_classifier",
+                            $id,
+                            $record
+                        );
                     }
-
-                    $result =  $db->update(
-                        "ccs_section_classifier",
-                        $id,
-                        $record
-                    );
-                } else {
-                    $output .= "New Classifier: " .  $record['date'] . ", " . $record['classifier'] . "<br>";
-
-                    $result =  $db->insert(
-                        "ccs_section_classifier",
-                        $record
-                    );
                 }
             }
         }
         $output .= '<br>';
     }
 }
+
+$output .= '<br>';
+
+
+
 email($to, 'CCS Section Classifier Summary Report', $output);
 
 if ($browser) {
