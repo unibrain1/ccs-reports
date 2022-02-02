@@ -92,7 +92,7 @@ $classifiers  = $db->query("SELECT * from ccs_classifiers WHERE status = 1")->re
         $('#classifiers').DataTable({
             'pageLength': 25,
             "order": [
-                [3, "desc"]
+                [13, "desc"]
             ],
 
             // https: //www.datatables.net/examples/api/multi_filter_select.html
