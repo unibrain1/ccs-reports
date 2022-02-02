@@ -38,6 +38,7 @@ $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); //
                             <th class='searchable'>Club ID</th>
                             <th class='searchable'>Name</th>
                             <th class='searchable'>Classifier</th>
+                            <th class='searchable'>Name</th>
                             <th class='searchable'>Date</th>
                             <th>Diagram (new window)</th>
 
@@ -48,11 +49,14 @@ $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); //
                         <?php
                         foreach ($classifiers as $classifier) {
                             $clubname = $db->query("SELECT name from ccs_clubs where club = ?", [$classifier->club])->first()->name;
+                            $classifier->classifiername = $db->query("SELECT * from ccs_classifiers where classifier LIKE ?", [$classifier->classifier])->first()->name;
+
 
                             echo "<tr>";
                             echo "<td>$classifier->club</td>";
                             echo "<td>$clubname</td>";
                             echo "<td>$classifier->classifier</td>";
+                            echo "<td>$classifier->classifiername</td>";
                             echo "<td>$classifier->date</td>";
 
                             echo '<td>' . '<a href="https://uspsa.org/viewer/' . $classifier->classifier . '.pdf" target="_blank"</a>Diagram</td>';
@@ -95,7 +99,6 @@ $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); //
         }
     );
 
-
     $(document).ready(function() {
         // Create date inputs
         minDate = new DateTime($('#min'), {
@@ -109,6 +112,9 @@ $classifiers = $db->query("SELECT * from ccs_section_classifier")->results(); //
 
         var table = $('#section').DataTable({
             'pageLength': 25,
+            "order": [
+                [4, "desc"]
+            ],
             // https: //www.datatables.net/examples/api/multi_filter_select.html
             initComplete: function() {
                 this.api().columns('.searchable').every(function() {
