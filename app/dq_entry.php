@@ -4,12 +4,13 @@ require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
 
-//  Three json payloads are available
-//  results.json  - Detailed match results 
-//  match_deg.json - Match definitions
-//  match_scores.json - Details and stage by stage scores 
 
-
+$messages = ""; // Messages
+$matchName = ""; // Name of match
+$matchDate = ""; // Date of match (YYYY-MM-DD)
+$matchClub = ""; // Name of club
+$shootersDQ = []; // Shooters who have DQ'd
+$matchShooters = []; // All the shooters in the match
 
 if (!empty($_GET)) {
 
@@ -22,6 +23,13 @@ if (!empty($_GET)) {
 
     // Initializing curl
     $curl = curl_init();
+
+
+    //  Three json payloads are available
+    //  results.json  - Detailed match results 
+    //  match_deg.json - Match definitions
+    //  match_scores.json - Details and stage by stage scores 
+
 
     // Sending GET request to reqres.in
     // server to get JSON data
@@ -83,16 +91,12 @@ if (!empty($_GET)) {
     // Closing curl
     curl_close($curl);
 
-    $output = ""; // Messages
-
     // Get some general match information
     $matchName = $match_defData["match_name"];
     $matchDate = date("Y-m-d", strtotime($match_defData["match_date"]));
     // Sometimes CLUB is not populated
     if (array_key_exists('match_clubcode', $match_defData)) {
         $matchClub = strtoupper($match_defData["match_clubcode"]);
-    } else {
-        $matchClub = "";
     }
 
     $shootersDQ = [];  // A place to gather the information before writiing to the dB
@@ -221,14 +225,14 @@ if (!empty($_GET)) {
         $id = $result->first()->id;
 
         if (!is_null($id)) {
-            $output .= "Update DQ Record for " .  $shooter['club'] . ", " . $shooter['lname'] . ", " . $shooter['date'] . "<br>";
+            $messages .= "Update DQ Record for " .  $shooter['club'] . ", " . $shooter['lname'] . ", " . $shooter['date'] . "<br>";
             $result =  $db->update(
                 "ccs_dq_log",
                 $id,
                 $shooter
             );
         } else {
-            $output .= "New DQ Record for " .  $shooter['club'] . ", " . $shooter['lname'] . ", " . $shooter['date'] . "<br>";
+            $messages .= "New DQ Record for " .  $shooter['club'] . ", " . $shooter['lname'] . ", " . $shooter['date'] . "<br>";
             $result =  $db->insert(
                 "ccs_dq_log",
                 $shooter
@@ -265,7 +269,7 @@ if (!empty($_GET)) {
                 echo "Club     : " . $matchClub . "<br>";
                 echo "Shooters : " . count($matchShooters) . "<br>";
                 echo "<br>";
-                echo $output;
+                echo $messages;
                 ?>
             </div>
         </div>
@@ -295,6 +299,7 @@ if (!empty($_GET)) {
                     </thead>
                     <tbody>
                         <?php
+
                         foreach ($shootersDQ as $shooter) {
                             // Print out DQ'd shooters
 
@@ -309,6 +314,7 @@ if (!empty($_GET)) {
                             echo '<td>' . $shooter['reason'] . '</td>';
                             echo '</tr>';
                         }
+
                         ?>
                     </tbody>
                 </table>
