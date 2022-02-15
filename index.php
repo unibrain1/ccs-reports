@@ -19,7 +19,8 @@ if (isset($user) && $user->isLoggedIn()) {
 
 			<?php
 			if ($user->isLoggedIn()) { ?>
-				<li>Section DQ - Reports on section DQ's</li>
+				<li><a href='app/dq_report.php'>Section DQ</a> - Reports on section DQ's</li>
+				<li><a href='app/dq_entry.php'>Section DQ Data Entry</a> - Parse Practiscore entry for DQ's</li>
 			<?php } ?>
 
 		</ul>
