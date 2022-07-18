@@ -52,3 +52,4 @@ usersc/vendor
 usersc/tests
 usersc/plugins/hooker/hooks/uman_tbody.php
 app/Points/output.csv
+app/includes/Searchable-Collapsible-JSON-Viewer-With-jQuery-jsonbrowser-js/*

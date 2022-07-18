@@ -69,6 +69,25 @@ if (!empty($_GET)) {
 }
 ?>
 
+<link rel="stylesheet" href="includes/jquery.jsonbrowser.css" type="text/css">
+
+<style>
+    input {
+        border: 1px solid #ccc;
+        padding: 2px 4px;
+        width: 200px;
+    }
+
+    .buttons {
+        margin: 0 0 10px 0;
+    }
+
+    .buttons a {
+        margin-right: 10px;
+    }
+</style>
+
+
 <br>
 <div class="row">
     <div class="col-6">
@@ -107,37 +126,120 @@ if (!empty($_GET)) {
     <div class="col-4">
         <div class='card'>
             <div class="card-header">
-                <label for="match_def.json" class="form-label">match_def.json</label>
+                <label for="match_def.json" class="form-label">match_def.json - Match definitions</label>
             </div>
             <div class='card-body'>
-                <?php
-                dump($match_defData);
-                ?>
+                <div class="buttons">
+                    <a href="#" id="collapse-all-match_defData">Collapse All</a>
+                    <a href="#" id="expand-all-match_defData">Expand All</a>
+                    <input type="text" id="search-match_defData" placeholder="Search ...">
+                </div>
+                <div id="match_defData" class="jsonbrowser"></div>
             </div>
         </div>
     </div>
     <div class="col-4">
         <div class='card'>
             <div class="card-header">
-                <label for="match_scores.json" class="form-label">match_scores.json</label>
+                <label for="match_scores.json" class="form-label">match_scores.json - Details and stage by stage scores </label>
             </div>
             <div class='card-body'>
-                <?php
-                dump($match_scoresData);
-                ?>
+                <div class="buttons">
+                    <a href="#" id="collapse-all-match_scoresData">Collapse All</a>
+                    <a href="#" id="expand-all-match_scoresData">Expand All</a>
+                    <input type="text" id="search-match_scoresData" placeholder="Search ...">
+                </div>
+                <div id="match_scoresData" class="jsonbrowser"></div>
             </div>
         </div>
     </div>
     <div class="col-4">
         <div class='card'>
             <div class="card-header">
-                <label for="results.json" class="form-label">results.json</label>
+                <label for="results.json" class="form-label">results.json - Detailed match results </label>
             </div>
             <div class='card-body'>
-                <?php
-                dump($match_results);
-                ?>
+                <div class="buttons">
+                    <a href="#" id="collapse-all">Collapse All</a>
+                    <a href="#" id="expand-all">Expand All</a>
+                    <input type="text" id="search" placeholder="Search ...">
+                </div>
+                <div id="results" class="jsonbrowser"></div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="includes/jquery.jsonbrowser.js"></script>
+
+
+<script>
+    $(function() {
+        var match_defData = <?php echo json_encode($match_defData); ?>;
+
+        $('#match_defData').jsonbrowser(match_defData);
+
+        $('#collapse-all-match_defData').on('click', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.collapseAll('#match_defData');
+        });
+
+        $('#expand-all-match_defData').on('click', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.expandAll('#match_defData');
+        });
+
+        $('#search-match_defData').on('keyup', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.search('#match_defData', $(this).val());
+        });
+        $('#search').focus().trigger('keyUp');
+
+
+
+
+        var match_scoresData = <?php echo json_encode($match_scoresData); ?>;
+
+        $('#match_scoresData').jsonbrowser(match_scoresData);
+
+        $('#collapse-all-match_scoresData').on('click', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.collapseAll('#match_scoresData');
+        });
+
+        $('#expand-all-match_scoresData').on('click', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.expandAll('#match_scoresData');
+        });
+
+        $('#search-match_scoresData').on('keyup', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.search('#match_scoresData', $(this).val());
+        });
+        $('#search').focus().trigger('keyUp');
+
+
+
+
+
+        var results = <?php echo json_encode($match_results); ?>;
+
+        $('#results').jsonbrowser(results);
+
+        $('#collapse-all').on('click', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.collapseAll('#results');
+        });
+
+        $('#expand-all').on('click', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.expandAll('#results');
+        });
+
+        $('#search').on('keyup', function(e) {
+            e.preventDefault();
+            $.jsonbrowser.search('#results', $(this).val());
+        });
+        $('#search').focus().trigger('keyUp');
+    });
+</script>
