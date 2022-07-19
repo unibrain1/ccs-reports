@@ -66,6 +66,14 @@ if (!empty($_GET)) {
     $match_defData = json_decode($match_def, true);
     $match_scoresData = json_decode($match_scores, true);
     $match_results = json_decode($results, true);
+
+
+    $matchName = $match_defData["match_name"];
+    $matchDate = date("Y-m-d", strtotime($match_defData["match_date"]));
+    if (array_key_exists('match_clubcode', $match_defData)) {
+        $matchClub = strtoupper($match_defData["match_clubcode"]);
+    }
+    $matchShooters = $match_defData["match_shooters"];
 }
 ?>
 
