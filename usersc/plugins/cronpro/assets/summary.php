@@ -1,12 +1,12 @@
 <?php
-$browser = false;  // Set to true if you are calling from a browser
+$browser = true;  // Set to true if you are calling from a browser
 
 if ($browser) {
     require_once '../../../../users/init.php';
 } else {
     global $ip, $settings, $db, $abs_us_root, $us_url_root;
     if ($ip != $settings->cron_ip) {
-        logger(1, "CronPro - summary.php", "Direct access attempted");
+        logger(1, "CCS Summary", "Direct access attempted");
         die;
     }
 }
@@ -14,6 +14,7 @@ if ($browser) {
 //put your script here. Don't touch anything above this line
 //Create any php script below
 
+logger(1, "CCS Summary", "Start");
 
 require_once $abs_us_root . $us_url_root . 'app/includes/simple_html_dom.php';
 
@@ -23,14 +24,18 @@ $base = 'https://uspsa.org/classifiers-by-club?action=show&club=';
 $clubs = $db->query("SELECT * from ccs_clubs where active = 1")->results();
 
 // Email report
-$to = 'competition@columbia-cascade.org';
+$to = 'coordinator@columbia-cascade.org';
 $output = ""; // Message to be emailed
 // Add a link to the report 
-$output .= '<a href="http://www.columbia-cascade.org/report/app/section_shot.php">Online Report</a><br><br><hr>';
+$output .= '<a href="https://columbia-cascade.org/report/app/section_shot.php">Online Report</a><br><br><hr>';
 
 
 foreach ($clubs as $club) {
+
     $url = $base . $club->club;
+    if ($browser) {
+           $output .= "Update CLUB " . $club->club . " URL " . $url . "<br>";
+    }
 
     $html = file_get_html($url);
     if ($html) {
@@ -77,15 +82,29 @@ foreach ($clubs as $club) {
             }
         }
         $output .= '<br>';
+    } else
+    {
+    	if ($browser) {
+		$error = error_get_last();
+           	$output .= " Request did not return HTML<br>";
+           	$output .= "   TYPE:" . $error['type'] . "<br>";
+           	$output .= "   MESSAGE:" . $error['message'] . "<br>";
+           	$output .= "   FILE:" . $error['file'] . "<br>";
+           	$output .= "   LINE:" . $error['line'] . "<br>";
+    	}
     }
 }
 
 $output .= '<br>';
 
 
-
-email($to, 'CCS Section Classifier Summary Report', $output);
-
 if ($browser) {
     echo $output;
+} else
+{
+	$email_sent=email($to, 'CCS Section Classifier Summary Report', $output);
+	if(!$email_sent){
+		logger(1,"CCS Summary","Error sending email = " . $email_sent);
+	}
+	logger(1,"CCS Summary","Complete");
 }

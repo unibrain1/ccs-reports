@@ -1,35 +1,68 @@
 <?php
-if (file_exists("install/index.php")) {
-	//perform redirect if installer files exist
-	//this if{} block may be deleted once installed
-	header("Location: install/index.php");
-}
 
 require_once 'users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
-if (isset($user) && $user->isLoggedIn()) {
-}
+$current_season = $db->query("SELECT current FROM points_currentseason")->results()[0]->current;
+
+
 ?>
-<div class="jumbotron">
-	<h1 align="center"><?= lang("JOIN_SUC"); ?> <?php echo $settings->site_name; ?></h1>
-	<div class="jumbotron">
-		<ul>
-			<li><a href='app/classifiers.php'>Classifiers</a> - A list of current USPSA classifiers with some intersting information about the setup for each</li>
-			<li><a href='app/section_shot.php'>Section Classifiers</a> - What classifiers the section has run and when</li>
-			<li><a href='app/Points/fetch.php'>Generate Points CSV</a></li>
+<div id='page-wrapper'>
+	<!-- Page Content -->
+	<div class='container-fluid'>
+		<?php
+		if ($user->isLoggedIn()) { ?>
+			<div class='row'>
+				<div class='col'>
+					<div class='card-block'>
+						<div class='card-header'>
+							<h2 align="center">Classifier Information</h2>
 
+						</div>
+						<div class='card-body'>
+							<ul>
+								<li><a href='classifiers/classifiers.php'>Classifiers</a> - A list of current USPSA classifiers with some intersting information about the setup for each</li>
+								<li><a href='classifiers/section_shot.php'>Section Classifiers</a> - What classifiers the section has run and when</li>
+								<li><a href='classifiers/dq_report.php'>Section DQ</a> - Reports on section DQ's</li>
+								<li><a href='classifiers/dq_entry.php'>Section DQ Data Entry</a> - Parse Practiscore entry for DQ's</li>
+								<li><a href='classifiers/download_match.php'>Download and Display a match</a> - Raw Data</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class='col'>
+					<div class='card-block'>
+						<div class='card-header'>
+							<h2 align="center">Points Series Information</h2>
+						</div>
+						<div class='card-body'>
+							<ul>
 
-			<?php
-			if ($user->isLoggedIn()) { ?>
-				<li><a href='app/dq_report.php'>Section DQ</a> - Reports on section DQ's</li>
-				<li><a href='app/dq_entry.php'>Section DQ Data Entry</a> - Parse Practiscore entry for DQ's</li>
-				<li><a href='app/download_match.php'>Download and Display a match</a> - Raw Data</li>
-				<li><a href='app/Points/fetch.php'>Generate Points CSV</a></li>
+								<li><a href='points/FetchPoints/fetch.php'>Generate Points CSV</a></li>
+								<br>
+								<li><a href='points/seasons.php'>Seasons and Match Information</a></li>
+								<li><a href='points/competitors.php'>Competitor Information</a></li>
+								<li><a href='points/standings.php'>Standings </a></li>
+								<li><a href='points/schedule.php'>Schedule </a></li>
 
-			<?php } ?>
-
-		</ul>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		<?php } ?>
+		<div class='row'>
+			<div class='col'>
+				<div class='card-block'>
+					<div class='card-header'>
+						<h2 align="center"><?= $current_season ?> Standings</h2>
+					</div>
+					<div class='card-body'>
+						<?php include 'points/include/_standings.php'; ?>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 
