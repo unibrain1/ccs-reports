@@ -13,149 +13,148 @@ $divisions = [
     "SS" => "Single Stack",
 ];
 
-$query = "SELECT c.First_Name, c.Last_Name, c.Division, c.USPSA,
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q1' AND r.MatchID='1' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q1.1',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q1' AND r.MatchID='2' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q1.2',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q1' AND r.MatchID='3' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q1.3',
+$quarters = [
+    "Q1", "Q2", "Q3", "Q4"
+];
 
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q2' AND r.MatchID='1' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q2.1',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q2' AND r.MatchID='2' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q2.2',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q2' AND r.MatchID='3' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q2.3',
+$results = array();
 
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q3' AND r.MatchID='1' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q3.1',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q3' AND r.MatchID='2' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q3.2',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q3' AND r.MatchID='3' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q3.3',
+$competitors = $db->query("SELECT First_Name, Last_Name, USPSA, Division, Nationals_Slot from points_competitors WHERE Season = ? ", [$current_season])->results('true');
+foreach ($competitors as $competitor) {
+    $results[$competitor['Division']][strtoupper($competitor['USPSA'])]['firstName']  = $competitor['First_Name'];
+    $results[$competitor['Division']][strtoupper($competitor['USPSA'])]['lastName']  = $competitor['Last_Name'];
+    $results[$competitor['Division']][strtoupper($competitor['USPSA'])]['slot']  = $competitor['Nationals_Slot'];
+}
 
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q4' AND r.MatchID='1' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q4.1',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q4' AND r.MatchID='2' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q4.2',
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Q4' AND r.MatchID='3' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Q4.3',
-
-(SELECT r.MatchPCT FROM points_results r WHERE r.Quarter='Special' AND r.USPSA=c.USPSA AND r.Division=c.Division AND r.Season='$current_season' LIMIT 1) AS 'Special'
-
-FROM points_competitors AS c
-WHERE c.Division = ?
-";
-
-
+foreach ($quarters as $quarter) {
+    for ($id = 1; $id <= 3; $id++) {
+        // Get the list of matches that cover the season, quarter, and match number
+        $matches = $db->query("SELECT * FROM points_matches WHERE season = ? AND quarter = ? AND matchid = ?", [$current_season, $quarter, $id])->results(true);
+        foreach ($matches as $match) {
+            // Only look at matches that have been uploaded
+            $matchname = $quarter . "." . $id;
+            if ($match['guid']) {
+                // For each of the matches get results for those in the points match
+                $query = $db->query(
+                    "SELECT r.name, r.uspsa, r.division, r.class, r.matchPct from points_results r
+                    JOIN points_competitors c ON r.uspsa = c.uspsa
+                    WHERE r.guid = ? AND r.division = c.division",
+                    [$match['guid']]
+                )->results('true');
+                foreach ($query as $i) {
+                    $results[$i['division']][strtoupper($i['uspsa'])]['name']     = $i['name'];
+                    $results[$i['division']][strtoupper($i['uspsa'])]['class']    = $i['class'];
+                    $results[$i['division']][strtoupper($i['uspsa'])][$matchname] = $i['matchPct'];
+                }
+            }
+        }
+    }
+}
 ?>
-
-
-<div class="card card-default">
-    <?php
-    foreach ($divisions as $key => $val) {
-        $results = $db->query($query, [$key]);
-    ?>
+<?php
+foreach ($results as $division => $divisionResults) {
+?>
+    <div class="card card-default">
         <div class='card-header'>
-            <h2><?php echo $val ?></h2>
+            <h2><?php echo $divisions[$division] ?></h2>
         </div>
-        <div class='card-body'>
 
-            <table id="" style="width: 80%" class="display table table-striped table-bordered table-sm">
-                <thead class="table-dark">
+        <div class='card-body'>
+            <table id="standings-<?= $divisions[$division] ?>" style="width: 100%" class="table table-striped table-bordered table-sm" aria-describedby="card-header">
+                <thead class=" table-dark">
                     <tr>
-                        <th scope=column>First Name</th>
-                        <th scope=column>Last Name</th>
+                        <th data-priority='1' scope=column>First Name</th>
+                        <th data-priority='1' scope=column>Last Name</th>
+                        <th scope=column>Slot</th>
                         <th scope=column>USPSA</th>
-                        <th scope=column>Division</th>
+                        <th scope=column>Class</th>
 
                         <th scope=column>Q1.1</th>
                         <th scope=column>Q1.2</th>
                         <th scope=column>Q1.3</th>
-                        <th scope=column>Q1 Points</th>
+                        <th data-priority='40' scope=column>Q1 Points</th>
 
                         <th scope=column>Q2.1</th>
                         <th scope=column>Q2.2</th>
                         <th scope=column>Q2.3</th>
-                        <th scope=column>Q2 Points</th>
+                        <th data-priority='30' scope=column>Q2 Points</th>
 
                         <th scope=column>Q3.1</th>
                         <th scope=column>Q3.2</th>
                         <th scope=column>Q3.3</th>
-                        <th scope=column>Q3 Points</th>
+                        <th data-priority='20' scope=column>Q3 Points</th>
 
                         <th scope=column>Q4.1</th>
                         <th scope=column>Q4.2</th>
                         <th scope=column>Q4.3</th>
-                        <th scope=column>Q4 Points</th>
-                        <th scope=column>Special</th>
-                        <th scope=column>Total</th>
+                        <th data-priority='10' scope=column>Q4 Points</th>
+                        <th scope=column>Sectional</th>
+                        <th data-priority='1' scope=column>Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
+                    foreach ($divisionResults as $uspsa => $results) {
+                        echo '<tr>';
 
-                    foreach ($results->results(true) as $record) {
-                        echo "<tr>";
-                        echo "<td>" . $record['First_Name'] . "</td>";
-                        echo "<td style='border-right:  solid'>" . $record['Last_Name'] . "</td>";
-                        echo "<td>" . $record['USPSA'] . "</td>";
-                        echo "<td>" . $record['Division'] . "</td>";
+                        echo '<td>';
+                        echo $results['firstName'];
+                        echo '</td>';
+
+                        echo '<td>';
+                        echo $results['lastName'];
+                        echo '</td>';
+                        echo '<td>';
+
+                        echo $results['slot'];
+                        echo '</td>';
+
+                        echo '<td>';
+                        echo $uspsa;
+                        echo '</td>';
+
+                        echo '<td style="border-right:  solid">';
+
+                        if (array_key_exists('class', $results)) {
+                            echo $results['class'];
+                        }
+                        echo '</td>';
 
                         $total = 0;
-
-                        $quarters = array("Q1.1", "Q1.2", "Q1.3");
-                        $temp = array();
-                        $subtotal = 0;
-                        foreach ($quarters as $q) {
-                            $temp[$q] = $record[$q];
-                            echo "<td>" . $record[$q] . "</td>";
+                        foreach ($quarters as $quarter) {
+                            $subtotal = array();
+                            for ($id = 1; $id <= 3; $id++) {
+                                echo '<td>';
+                                $arrayKey = $quarter . "." . $id;
+                                if (array_key_exists($arrayKey, $results)) {
+                                    echo $results[$arrayKey];
+                                    $subtotal[$arrayKey] = $results[$arrayKey];
+                                }
+                                echo '</td>';
+                            }
+                            echo '<td style="background-color: #FFFFE0;">';
+                            arsort($subtotal);
+                            if (count($subtotal) > 2) {
+                                array_pop($subtotal);
+                            }
+                            $sum = array_sum($subtotal);
+                            echo $sum;
+                            $total = $total + $sum;
+                            echo '</td>';
                         }
-                        arsort($temp);
-                        $keys = array_keys($temp);
-                        $subtotal = $temp[$keys[0]] + $temp[$keys[1]];
-                        $total = $total + $subtotal;
-                        echo "<td style='border-right:  solid' class='table-info'>" . $subtotal . "</td>";
 
-
-                        $quarters = array("Q2.1", "Q2.2", "Q2.3");
-                        $temp = array();
-                        $subtotal = 0;
-                        foreach ($quarters as $q) {
-                            $temp[$q] = $record[$q];
-                            echo "<td>" . $record[$q] . "</td>";
+                        echo '<td>';
+                        if (array_key_exists('sectional', $results)) {
+                            echo $results['sectionl'];
+                            $total = $total + 2 * $results['sectionl'];
                         }
-                        arsort($temp);
-                        $keys = array_keys($temp);
-                        $subtotal = $temp[$keys[0]] + $temp[$keys[1]];
-                        $total = $total + $subtotal;
-                        echo "<td style='border-right:  solid' class='table-info'>" . $subtotal . "</td>";
+                        echo '</td>';
 
+                        echo '<td style="background-color: #FFE0FF;">';
+                        echo $total;
+                        echo '</td>';
 
-                        $quarters = array("Q3.1", "Q3.2", "Q3.3");
-                        $temp = array();
-                        $subtotal = 0;
-                        foreach ($quarters as $q) {
-                            $temp[$q] = $record[$q];
-                            echo "<td>" . $record[$q] . "</td>";
-                        }
-                        arsort($temp);
-                        $keys = array_keys($temp);
-                        $subtotal = $temp[$keys[0]] + $temp[$keys[1]];
-                        $total = $total + $subtotal;
-                        echo "<td style='border-right:  solid' class='table-info'>" . $subtotal . "</td>";
-
-
-                        $quarters = array("Q4.1", "Q4.2", "Q4.3");
-                        $temp = array();
-                        $subtotal = 0;
-                        foreach ($quarters as $q) {
-                            $temp[$q] = $record[$q];
-                            echo "<td>" . $record[$q] . "</td>";
-                        }
-                        arsort($temp);
-                        $keys = array_keys($temp);
-                        $subtotal = $temp[$keys[0]] + $temp[$keys[1]];
-                        $total = $total + $subtotal;
-                        echo "<td style='border-right:  solid' class='table-info'>" . $subtotal . "</td>";
-
-
-                        echo "<td>" . $record['Special'] . "</td>";
-
-                        $subtotal = $record['Special'];
-                        $total = $total + 2 * $subtotal;
-                        echo "<td class='table-success'>" . $total . "</td>";
-
-                        echo "</tr>";
+                        echo '</tr>';
                     }
 
                     ?>
@@ -163,30 +162,7 @@ WHERE c.Division = ?
                 </tbody>
             </table>
         </div>
-    <?php
-    }
-    ?>
-</div>
-
-
-
-
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css" />
-
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
-
-<script>
-    $('table.display').dataTable({
-        "order": [
-            [21, 'desc']
-        ],
-
-        searching: false,
-        paging: false,
-        info: false,
-        columnDefs: [{
-            visible: false,
-            targets: [2, 3]
-        }]
-    });
-</script>
+    </div>
+<?php
+}
+?>

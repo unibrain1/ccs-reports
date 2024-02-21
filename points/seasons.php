@@ -3,68 +3,60 @@
 require_once '../users/init.php';
 require_once $abs_us_root . $us_url_root . 'users/includes/template/prep.php';
 
-if (isset($user) && $user->isLoggedIn()) {
-}
+$current_season = $db->query("SELECT current FROM points_currentseason")->results()[0]->current;
+$seasons = $db->query("SELECT * FROM points_seasons")->results();
+$matches = $db->query("SELECT * FROM points_matches WHERE season = ? ORDER BY date ASC", [$current_season])->results();
+
 ?>
 <div id='page-wrapper'>
     <!-- Page Content -->
-    <div class='container'>
+    <div class='container-fluid'>
         <div class='row'>
             <div class='col-12'>
                 <!-- Heading Row -->
-                <h1 align="center"> Manage Seasons Information</h1>
+                <h1 align="center"> Manage Season Information</h1>
             </div>
         </div>
     </div>
     <br>
     <div class='row'>
-        <div class='col-12'>
+        <div class='col-6'>
             <div class='card-block'>
                 <div class='card-header'>
                     <h2 align="center">Current Season</h2>
                 </div>
                 <div class='card-body'>
                     <?php
-                    $query = $db->query("SELECT * FROM points_currentseason")->results();
-                    $table = "points_currentseason";
-                    quickCrud($query, $table);
+
+
+                    echo '<h3>Current season: ' . $current_season . '</h3></br>';
+                    echo '<button type="current_season" class="btn btn-warning btn-lg btn-block">Edit</button></br>';
                     ?>
                 </div>
             </div>
         </div>
-    </div>
-    <div class='row'>
-        <div class='col-12'>
+
+        <div class='col-6'>
             <div class='card-block'>
                 <div class='card-header'>
                     <h2 align="center">All Seasons</h2>
                 </div>
                 <div class='card-body'>
                     <?php
-                    $query = $db->query("SELECT * FROM points_seasons")->results();
-                    $table = "points_seasons";
-                    quickCrud($query, $table);
+                    echo '<ul>';
+                    foreach ($seasons as $s) {
+                        echo '<li>' . $s->season . "</li>";
+                    }
+
+                    echo '</ul>';
+                    echo '<button type="seasons" class="btn btn-warning btn-lg btn-block">Add</button></br>';
                     ?>
+
                 </div>
             </div>
         </div>
     </div>
-    <div class='row'>
-        <div class='col-12'>
-            <div class='card-block'>
-                <div class='card-header'>
-                    <h2 align="center">Matches</h2>
-                </div>
-                <div class='card-body'>
-                    <?php
-                    $query = $db->query("SELECT * FROM points_matches")->results();
-                    $table = "points_seasons";
-                    quickCrud($query, $table);
-                    ?>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 </div>
 

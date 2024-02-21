@@ -10,3 +10,5 @@
 <meta property="og:title" content="Columbia Cascade Reports" /> <!-- title of site (title of share) -->
 <meta property="og:description" content="Powered by UserSpice" /> <!-- description of site (text which appears when sharing) -->
 <meta property="og:image" content="" /> <!-- URL for preview image -->
+
+<meta name="format-detection" content="telephone=no"> <!-- Tell Safari not to make numbers into phone numbers -->

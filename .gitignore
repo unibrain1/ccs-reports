@@ -17,6 +17,7 @@ runme.php
 *.sublime-project
 *.code-workspace
 push.sh
+sample-data/*
 
 # Exclude userspice base
 # Because I want to include users/cron/backup.php I need to do this
