@@ -13,140 +13,128 @@ $matches = $db->query("SELECT * FROM points_matches WHERE season = ? ORDER BY da
     <!-- Page Content -->
     <div class='container-fluid'>
         <div class='row'>
-            <div class='col-12'>
-                <!-- Heading Row -->
-                <h1 align="center"> Manage Match Information</h1>
-            </div>
-        </div>
-    </div>
-    <br>
+            <div class='col'>
+                <div class='card-block'>
+                    <div class='card-header'>
+                        <h2 align="center">Matches in Current Season</h2>
+                    </div>
+                    <div class='card-body'>
 
-    <div class='row'>
-        <div class='col'>
-            <div class='card-block'>
-                <div class='card-header'>
-                    <h2 align="center">Matches in Current Season</h2>
-                </div>
-                <div class='card-body'>
+                        <table id="schedule" class="table table-hover table-striped table-bordered table-responsive-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope=column style="white-space-trim: nowrap; width: 1%;">id</th>
+                                    <th scope=column style="white-space-trim: nowrap; width: 1%;">Quarter</th>
+                                    <th scope=column style="white-space-trim: nowrap; width: 1%;">Match</th>
+                                    <th scope=column>Location</th>
+                                    <th scope=column>Date</th>
 
-                    <table id="schedule" class="display table table-striped table-bordered table-sm">
-                        <thead class="table-dark">
-                            <tr>
-                                <th scope=column>id</th>
-                                <th scope=column>quarter</th>
-                                <th scope=column>matchid</th>
-                                <th scope=column>Location</th>
-                                <th scope=column>Date</th>
+                                    <th scope=column>Pistol</th>
+                                    <th scope=column>PCC</th>
+                                    <th scope=column>Count</th>
+                                    <th scope=column>Upload</th>
+                                    <th scope=column>Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
 
-                                <th scope=column>Pistol</th>
-                                <th scope=column>PCC</th>
-                                <th scope=column>Count</th>
-                                <th scope=column>Option</th>
-                                <th scope=column>URL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
+                                foreach ($matches as $match) {
 
-                            foreach ($matches as $match) {
+                                    $matchurl = guidturl($match->guid);
 
-                                $matchurl = guidturl($match->guid);
+                                ?>
+                                    <form method=" post" id="editMatch" name="editMatch" action="actions/_matches.php" enctype="multipart/form-data" novalidate>
+                                        <input type="hidden" name="csrf" id="csrf" value="<?= Token::generate(); ?>" />
+                                        <input type="hidden" name="id" id="id" value="<?= $match->id ?>" />
+                                        <input type="hidden" name="pistol" id="pistol" value="<?= $match->pistol ?>" />
+                                        <input type="hidden" name="pcc" id="pcc" value="<?= $match->pcc ?>" />
 
-                            ?>
-                                <form method="post" id="editMatch" name="editMatch" action="actions/_matches.php" enctype="multipart/form-data" novalidate>
-                                    <input type="hidden" name="csrf" id="csrf" value="<?= Token::generate(); ?>" />
-                                    <input type="hidden" name="id" id="id" value="<?= $match->id ?>" />
-                                    <input type="hidden" name="pistol" id="pistol" value="<?= $match->pistol ?>" />
-                                    <input type="hidden" name="pcc" id="pcc" value="<?= $match->pcc ?>" />
+                                        <tr>
+                                            <td><?= $match->id  ?></td>
+                                            <td><?= $match->quarter  ?></td>
+                                            <td><?= $match->matchid  ?></td>
+                                            <td><?= $match->location  ?></td>
+                                            <td><?= date_format(date_create($match->date), 'D: M, d Y')  ?></td>
+                                            <?php
+                                            if ($match->pistol) {
+                                            ?>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="" id="pistol" checked>
+                                                        <label class="form-check-label" for="pistol">
+                                                            Pistol
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                            <?php
+                                            } else {
+                                            ?>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="" id="pistol">
+                                                        <label class="form-check-label" for="pistol">
+                                                            Pistol
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                            <?php
+                                            }
+                                            if ($match->pcc) {
+                                            ?>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="" id="pcc" checked>
+                                                        <label class="form-check-label" for="pcc">
+                                                            PCC
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                            <?php
+                                            } else {
+                                            ?>
+                                                <td>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" value="" id="pcc">
+                                                        <label class="form-check-label" for="pcc">
+                                                            PCC
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                            <?php
+                                            }
 
-                                    <tr>
-                                        <td><?= $match->id  ?></td>
-                                        <td><?= $match->quarter  ?></td>
-                                        <td><?= $match->matchid  ?></td>
-                                        <td><?= $match->location  ?></td>
-                                        <td><?= date_format(date_create($match->date), 'D: M, d Y')  ?></td>
-                                        <?php
-                                        if ($match->pistol) {
-                                        ?>
+                                            $q = "SELECT count(*) as count FROM points_results WHERE guid = ?";
+                                            $count = $db->query($q, [$match->guid]);
+
+                                            if ($count->count()) {
+                                                echo '<td>' . $count->results()[0]->count . '</td>';
+                                            } else {
+                                                echo '<td></td>';
+                                            }
+                                            ?>
                                             <td>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" id="pistol" checked>
-                                                    <label class="form-check-label" for="pistol">
-                                                        Pistol
-                                                    </label>
-                                                </div>
+                                                <button type="submit" name="action" value="upload" class="btn btn-warning">Upload</button>
+                                                <input type="text" class="form-control" name="matchurl" id="matchurl" placeholder="<?= $matchurl ?>" value="<?= $matchurl ?>">
                                             </td>
-                                        <?php
-                                        } else {
-                                        ?>
                                             <td>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" id="pistol">
-                                                    <label class="form-check-label" for="pistol">
-                                                        Pistol
-                                                    </label>
-                                                </div>
+                                                <button type="submit" name="action" value="delete" class="btn btn-danger btn-sm ">Delete</button>
                                             </td>
-                                        <?php
-                                        }
-                                        if ($match->pcc) {
-                                        ?>
-                                            <td>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" id="pcc" checked>
-                                                    <label class="form-check-label" for="pcc">
-                                                        PCC
-                                                    </label>
-                                                </div>
-                                            </td>
-                                        <?php
-                                        } else {
-                                        ?>
-                                            <td>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" id="pcc">
-                                                    <label class="form-check-label" for="pcc">
-                                                        PCC
-                                                    </label>
-                                                </div>
-                                            </td>
-                                        <?php
-                                        }
+                                        </tr>
+                                    </form>
 
-                                        $q = "SELECT count(*) as count FROM points_results WHERE guid = ?";
-                                        $count = $db->query($q, [$match->guid]);
+                                <?php
+                                }
+                                ?>
 
-                                        if ($count->count()) {
-                                            echo '<td>' . $count->results()[0]->count . '</td>';
-                                        } else {
-                                            echo '<td></td>';
-                                        }
-                                        ?>
-
-                                        <td>
-                                            <button type="submit" name="action" value="delete" class="btn btn-danger btn-lg btn-block">Delete</button>
-                                        </td>
-
-                                        <td>
-                                            <button type="submit" name="action" value="upload" class="btn btn-warning btn-lg btn-block">Upload</button>
-                                            <label for="matchurl">Match URL</label>
-                                            <input type="text" class="form-control-file" name="matchurl" id="matchurl" placeholder="<?= $matchurl ?>" value="<?= $matchurl ?>">
-                                        </td>
-                                    </tr>
-                                </form>
-
-                            <?php
-                            }
-                            ?>
-
-                        </tbody>
-                    </table>
-                    ?>
+                            </tbody>
+                        </table>
+                        ?>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 
 

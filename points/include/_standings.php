@@ -60,7 +60,7 @@ foreach ($results as $division => $divisionResults) {
         </div>
 
         <div class='card-body'>
-            <table id="standings-<?= $divisions[$division] ?>" style="width: 100%" class="table table-striped table-bordered table-sm" aria-describedby="card-header">
+            <table id="standings-<?= $divisions[$division] ?>" style="width: 100%" class="table table-striped table-bordered table-sm table-hover" aria-describedby="card-header">
                 <thead class=" table-dark">
                     <tr>
                         <th data-priority='1' scope=column>First Name</th>

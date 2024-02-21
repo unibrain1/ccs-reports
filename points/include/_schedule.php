@@ -3,7 +3,7 @@ $query = 'SELECT * FROM points_matches WHERE season = ? ORDER BY date ASC ';
 $schedule = $db->query($query, [$current_season]);
 ?>
 
-<table id="schedule" style="width: 100%" class="display table table-striped table-bordered table-sm">
+<table id="schedule" style="width: 100%" class="table table-hover table-striped table-bordered table-responsive-sm">
     <thead class="table-dark">
         <tr>
             <th scope=column>Quarter</th>
@@ -24,6 +24,7 @@ $schedule = $db->query($query, [$current_season]);
             echo '<td>' . $record['quarter'] . "." . $record['matchid'] . '</td>';
             echo '<td>' . $record['location'] . '</td>';
             echo '<td>' . $record['date'] . '</td>';
+
             if ($record['pistol']) {
                 echo '<td><i class="fa fa-fw fa-check" style="color: green"></i></td>';
             } else {
