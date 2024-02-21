@@ -35,6 +35,7 @@ usersc/plugins/*
 usersc/plugins/cronpro/*
 !usersc/plugins/cronpro/assets/
 usersc/includes/deprecated/*
+!usersc/includes/analytics.php
 
 #
 usersc/templates/*
@@ -49,7 +50,6 @@ usupdate.zip
 users/updates/
 # exclude Test Cases
 tests/
-.htaccess
 #exclude composer and vendor files
 vendor
 composer.lock
