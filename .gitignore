@@ -38,6 +38,8 @@ usersc/includes/deprecated/*
 
 #
 usersc/templates/*
+!usersc/templates/points
+
 usersc/widgets/*
 install/*
 
