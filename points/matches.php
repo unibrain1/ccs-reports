@@ -44,7 +44,7 @@ $matches = $db->query("SELECT * FROM points_matches WHERE season = ? ORDER BY da
                                     $matchurl = guidturl($match->guid);
 
                                 ?>
-                                    <form method=" post" id="editMatch" name="editMatch" action="actions/_matches.php" enctype="multipart/form-data" novalidate>
+                                    <form method="post" id="editMatch" name="editMatch" action="actions/_matches.php" enctype="multipart/form-data" novalidate>
                                         <input type="hidden" name="csrf" id="csrf" value="<?= Token::generate(); ?>" />
                                         <input type="hidden" name="id" id="id" value="<?= $match->id ?>" />
                                         <input type="hidden" name="pistol" id="pistol" value="<?= $match->pistol ?>" />

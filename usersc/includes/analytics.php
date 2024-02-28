@@ -20,18 +20,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Paste your analytics script below.
 //Don't forget your <script></script> tags!
-?>
-
-
-<script type="text/javascript">
-    $(document).ready(function() {
-        $("form").each(function() {
-            var method = $(this).attr('method');
-            if (typeof method !== "undefined") { //make sure the form actually has a method attribute
-                if (method.toUpperCase() === 'POST') { //case insensitive
-                    $(this).attr("action", "");
-                }
-            }
-        });
-    });
-</script>

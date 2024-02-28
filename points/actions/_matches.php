@@ -38,6 +38,7 @@ if (!empty($_POST)) {
                 die('Not a valid URL');  // Should do something better than this
             }
 
+
             // Download the match for pistol and/or PCC according to flags
             if ($pistol) {
                 $divisions = $pistolDivisions;
@@ -73,8 +74,9 @@ if (!empty($_POST)) {
             $matchShooters = $matchDef["match_shooters"];
             $countMatchShooters = 0;
             foreach ($matchShooters as $s) {
-                if ($s['sh_del'] != 'true')
+                if ($s['sh_del'] != 'true') {
                     $countMatchShooters++;
+                }
             }
 
             $i = 0;
